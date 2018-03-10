@@ -19,7 +19,7 @@ post '/upload' do
     end
     blur save_path
     resize save_path, 100, 100
-    enchar save_path, '(Z>)90  (ENW)90t = 1'
+    enchar save_path, '(Z>)90  (ENW)90t = 1', '#428b09'
   else
     @mes = 'アップロード失敗'
   end
@@ -54,19 +54,30 @@ helpers do
     new_img.destroy!
   end
 
-  def enchar image_path, char
+  def enchar image_path, char, fill
     image_file_name = File.basename(image_path)
     img = Magick::ImageList.new(image_path)
-    scaled_img = img.scale(300, 300)
+    # scaled_img = img.scale(300, 300)
+    scaled_img = img
 
     font = "851tegaki_zatsu_normal_0883.ttf"
     draw = Magick::Draw.new
+
     draw.annotate(scaled_img, 0, 0, 5, 5, char) do
-      self.font      = font
-      self.fill      = 'blue'
-      self.stroke    = 'transparent'
+      self.font = font
+      self.fill = fill
+      self.stroke = 'white'
+      self.stroke_width = 4
       self.pointsize = 30
-      self.gravity   = Magick::NorthWestGravity
+      self.gravity = Magick::NorthWestGravity
+    end
+
+    draw.annotate(scaled_img, 0, 0, 5, 5, char) do
+      self.font = font
+      self.fill = fill
+      self.stroke = 'transparent'
+      self.pointsize = 30
+      self.gravity = Magick::NorthWestGravity
     end
 
     scaled_img.write("public/images/enchar_#{image_file_name}")
