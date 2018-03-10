@@ -15,11 +15,11 @@ post '/upload' do
     File.open(save_path, 'wb') do |f|
       p params[:photo][:tempfile]
       f.write params[:photo][:tempfile].read
-      @mes = 'アップロード成功'
     end
     blur save_path
     resize save_path, 100, 100
     enchar save_path, '(Z>)90  (ENW)90t = 1', '#428b09'
+    @mes = 'アップロード成功'
   else
     @mes = 'アップロード失敗'
   end
@@ -28,17 +28,17 @@ post '/upload' do
 end
 
 get '/images' do
-  images_name = Dir.glob("./public/images/*")
+  images_name = Dir.glob('./public/images/*')
   @images_path = []
   images_name.each do |image|
-    image_path = image.gsub("public/", "./")
+    image_path = image.gsub('public/', './')
     @images_path << image_path
   end
   slim :images
 end
 
 helpers do
-  def blur image_path
+  def blur(image_path)
     image_file_name = File.basename(image_path)
     img = Magick::ImageList.new(image_path)
     new_img = img.blur_image(20.0, 10.0)
@@ -46,7 +46,7 @@ helpers do
     new_img.destroy!
   end
 
-  def resize image_path, height, width
+  def resize(image_path, height, width)
     image_file_name = File.basename(image_path)
     img = Magick::ImageList.new(image_path)
     new_img = img.scale(height, width)
@@ -54,13 +54,13 @@ helpers do
     new_img.destroy!
   end
 
-  def enchar image_path, char, fill
+  def enchar(image_path, char, fill)
     image_file_name = File.basename(image_path)
     img = Magick::ImageList.new(image_path)
     # scaled_img = img.scale(300, 300)
     scaled_img = img
 
-    font = "851tegaki_zatsu_normal_0883.ttf"
+    font = '851tegaki_zatsu_normal_0883.ttf'
     draw = Magick::Draw.new
 
     draw.annotate(scaled_img, 0, 0, 5, 5, char) do
