@@ -11,23 +11,22 @@ end
 post '/upload' do
   @title = 'upload'
   if params[:photo]
-    save_path = "./public/images/#{params[:photo][:filename]}"
-    File.open(save_path, 'wb') do |f|
+    image_path = "./public/images/#{params[:photo][:filename]}"
+    File.open(image_path, 'wb') do |f|
       p params[:photo][:tempfile]
       f.write params[:photo][:tempfile].read
     end
-    blur save_path
-    resize save_path, 100, 100
-    enchar save_path, '(Z>)90  (ENW)90t = 1', '#428b09'
+    addwindow image_path
+    enchar image_path, params[:message].to_s, params[:pointsize].to_i
     @mes = 'アップロード成功'
   else
     @mes = 'アップロード失敗'
   end
-  slim :upload
   redirect 'images'
 end
 
 get '/images' do
+  @title = 'local images'
   images_name = Dir.glob('./public/images/*')
   @images_path = []
   images_name.each do |image|
@@ -38,14 +37,6 @@ get '/images' do
 end
 
 helpers do
-  def blur(image_path)
-    image_file_name = File.basename(image_path)
-    img = Magick::ImageList.new(image_path)
-    new_img = img.blur_image(20.0, 10.0)
-    new_img.write("public/images/blur_#{image_file_name}")
-    new_img.destroy!
-  end
-
   def resize(image_path, height, width)
     image_file_name = File.basename(image_path)
     img = Magick::ImageList.new(image_path)
@@ -54,33 +45,49 @@ helpers do
     new_img.destroy!
   end
 
-  def enchar(image_path, char, fill)
+  def addwindow(image_path)
     image_file_name = File.basename(image_path)
     img = Magick::ImageList.new(image_path)
-    # scaled_img = img.scale(300, 300)
-    scaled_img = img
+    start = img.rows
+    height = (img.rows / 3) * 2
+    width = img.columns
 
-    font = '851tegaki_zatsu_normal_0883.ttf'
     draw = Magick::Draw.new
+    draw.fill('#428b0960')
+    draw.rectangle(0, start, width, height)
+    draw.draw(img)
+    img.write("public/images/#{image_file_name}")
+    img.destroy!
+  end
 
-    draw.annotate(scaled_img, 0, 0, 5, 5, char) do
+  def enchar(image_path, char, pointsize)
+    image_file_name = File.basename(image_path)
+    img = Magick::ImageList.new(image_path)
+    start = img.rows
+    height = (img.rows / 3) * 2
+    width = img.columns
+    fill = '#A6126A'
+
+    font = 'public/fonts/851tegaki_zatsu_normal_0883.ttf'
+    draw = Magick::Draw.new
+    draw.annotate(img, 0, 0, 5, height, char) do
       self.font = font
       self.fill = fill
+      self.pointsize = pointsize
       self.stroke = 'white'
       self.stroke_width = 4
-      self.pointsize = 30
       self.gravity = Magick::NorthWestGravity
     end
 
-    draw.annotate(scaled_img, 0, 0, 5, 5, char) do
+    draw.annotate(img, 0, 0, 5, height, char) do
       self.font = font
       self.fill = fill
+      self.pointsize = pointsize
       self.stroke = 'transparent'
-      self.pointsize = 30
       self.gravity = Magick::NorthWestGravity
     end
 
-    scaled_img.write("public/images/enchar_#{image_file_name}")
-    scaled_img.destroy!
+    img.write("public/images/#{image_file_name}")
+    img.destroy!
   end
 end
