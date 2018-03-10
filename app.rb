@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'sinatra/reloader'
 require 'slim'
+require 'RMagick'
 
 get '/' do
   @title = 'heroine_filter'
@@ -16,6 +17,8 @@ post '/upload' do
       f.write params[:photo][:tempfile].read
       @mes = 'アップロード成功'
     end
+    blur save_path
+    resize save_path, 100, 100
   else
     @mes = 'アップロード失敗'
   end
@@ -27,7 +30,27 @@ get '/images' do
   images_name = Dir.glob("./public/images/*")
   @images_path = []
   images_name.each do |image|
-    @images_path << image.gsub("public/", "./")
+    image_path = image.gsub("public/", "./")
+    @images_path << image_path
   end
   slim :images
+end
+
+helpers do
+  def blur image_path
+    image_file_name = File.basename(image_path)
+    img = Magick::ImageList.new(image_path)
+    new_img = img.blur_image(20.0, 10.0)
+    new_img.write("public/images/blur_#{image_file_name}")
+    new_img.destroy!
+  end
+
+  def resize image_path, height, width
+    image_file_name = File.basename(image_path)
+    image_file_name = File.basename(image_path)
+    img = Magick::ImageList.new(image_path)
+    new_img = img.scale(height, width)
+    new_img.write("public/images/resize_#{image_file_name}")
+    new_img.destroy!
+  end
 end
