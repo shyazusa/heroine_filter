@@ -5,6 +5,7 @@ require 'RMagick'
 
 get '/' do
   @title = 'heroine_filter'
+  @fonts_path = fonts_list
   slim :index
 end
 
@@ -16,8 +17,10 @@ post '/upload' do
       p params[:photo][:tempfile]
       f.write params[:photo][:tempfile].read
     end
-    addwindow image_path
-    enchar image_path, params[:message].to_s, params[:pointsize].to_i
+    addwindow image_path, 'name'
+    enchar image_path, params[:name].to_s, params[:font].to_s, params[:pointsize].to_i
+    addwindow image_path, 'message'
+    enchar image_path, params[:message].to_s, params[:font].to_s, params[:pointsize].to_i
     @mes = 'アップロード成功'
   else
     @mes = 'アップロード失敗'
@@ -29,9 +32,9 @@ get '/images' do
   @title = 'local images'
   images_name = Dir.glob('./public/images/*')
   @images_path = []
+  images_name.sort!
   images_name.each do |image|
-    image_path = image.gsub('public/', './')
-    @images_path << image_path
+    @images_path << image.gsub('public/', './')
   end
   slim :images
 end
@@ -60,7 +63,7 @@ helpers do
     img.destroy!
   end
 
-  def enchar(image_path, char, pointsize)
+  def enchar(image_path, char, font, pointsize)
     image_file_name = File.basename(image_path)
     img = Magick::ImageList.new(image_path)
     start = img.rows
@@ -68,7 +71,7 @@ helpers do
     width = img.columns
     fill = '#A6126A'
 
-    font = 'public/fonts/851tegaki_zatsu_normal_0883.ttf'
+    @fonts_path = fonts_list
     draw = Magick::Draw.new
     draw.annotate(img, 0, 0, 5, height, char) do
       self.font = font
@@ -89,5 +92,15 @@ helpers do
 
     img.write("public/images/#{image_file_name}")
     img.destroy!
+  end
+
+  def fonts_list
+    fonts_name = Dir.glob('./public/fonts/*')
+    @fonts_path = []
+    fonts_name.sort!
+    fonts_name.each do |font|
+      @fonts_path << font
+    end
+    @fonts_path
   end
 end
