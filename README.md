@@ -17,7 +17,6 @@ $ bundle install
 $ mkdir public
 $ mkdir public/images
 $ mkdir public/fonts
-$ bundle exec ruby app.rb
 ```
 
 #### Add fonts
@@ -25,5 +24,9 @@ $ bundle exec ruby app.rb
 Place the font you want to use in this project in `public/fonts`.
 
 ### Use!
+
+```
+$ bundle exec ruby app.rb
+```
 
 Accsess to `http://localhost:4567/`
