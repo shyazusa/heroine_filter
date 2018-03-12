@@ -10,7 +10,6 @@ get '/' do
 end
 
 post '/upload' do
-  @title = 'upload'
   if params[:photo]
     image_path = "./public/images/#{params[:photo][:filename]}"
     File.open(image_path, 'wb') do |f|
