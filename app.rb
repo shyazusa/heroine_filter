@@ -18,10 +18,12 @@ post '/upload' do
       f.write params[:photo][:tempfile].read
     end
     addwindow image_path
-    enchar image_path, params[:message].to_s, params[:font].to_s, params[:pointsize].to_i
-    @mes = 'アップロード成功'
-  else
-    @mes = 'アップロード失敗'
+    enchar(
+      image_path,
+      params[:message].to_s,
+      params[:font].to_s,
+      params[:pointsize].to_i
+    )
   end
   redirect 'images'
 end
@@ -38,14 +40,6 @@ get '/images' do
 end
 
 helpers do
-  def resize(image_path, height, width)
-    image_file_name = File.basename(image_path)
-    img = Magick::ImageList.new(image_path)
-    new_img = img.scale(height, width)
-    new_img.write("public/images/resize_#{image_file_name}")
-    new_img.destroy!
-  end
-
   def addwindow(image_path)
     image_file_name = File.basename(image_path)
     img = Magick::ImageList.new(image_path)
@@ -64,9 +58,7 @@ helpers do
   def enchar(image_path, char, font, pointsize)
     image_file_name = File.basename(image_path)
     img = Magick::ImageList.new(image_path)
-    start = img.rows
     height = (img.rows / 3) * 2
-    width = img.columns
     fill = '#A6126A'
 
     @fonts_path = fonts_list
@@ -94,8 +86,8 @@ helpers do
 
   def fonts_list
     fonts_name = Dir.glob('./public/fonts/*')
-    @fonts_path = []
     fonts_name.sort!
+    @fonts_path = []
     fonts_name.each do |font|
       @fonts_path << font
     end
